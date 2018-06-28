@@ -2,7 +2,7 @@ extern crate hdlc_rust as hdlc;
 
 #[cfg(test)]
 mod tests {
-    use hdlc::{decode, encode, SpecialChars, HDLCError};
+    use hdlc::{decode, encode, HDLCError, SpecialChars};
 
     #[test]
     fn packetizes() {
@@ -108,7 +108,6 @@ mod tests {
             0x71,
         ];
         let cmp: Vec<u8> = vec![1, 126, 0x71, 0, 5, 128, 0x70, 9];
-
 
         let result = decode(msg, chars);
 

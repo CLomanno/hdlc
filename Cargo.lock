@@ -1,4 +1,4 @@
 [[package]]
-name = "hdlc"
+name = "hdlc-rust"
 version = "0.1.0"
 

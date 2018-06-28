@@ -1,7 +1,43 @@
+//! # hdlc-rust
+//! Rust implementation of a High-level Data Link Control (HDLC) library
+//!
+//! ## Usage
+//! ### Encode packet
+//! ```rust
+//! extern crate hdlc-rust;
+//! use hdlc::{SpecialChars, encode};
+//!
+//! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
+//! let chars = hdlc::SpecialChars::default();
+//!
+//! assert_eq!(
+//!     hdlc::encode(msg, chars),
+//!     [126, 1, 80, 0, 0, 0, 5, 128, 9, 126]
+//! )
+//! ```
+//!
+//! ### Decode packet
+//! ```rust
+//! extern crate hdlc_rust;
+//! use hdlc::{SpecialChars, decode};
+//!
+//! let chars = hdlc::SpecialChars::default();
+//! let msg: Vec<u8> = vec![
+//!     chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend
+//! ];
+//! assert_eq!(hdlc::decode(msg, chars),
+//!     [1, 80, 0, 0, 0, 5, 128, 9]
+//! )
+//! ```
+
+#![deny(missing_docs)]
+
 use std::collections::HashSet;
 use std::default::Default;
-use std::io::Result;
+use std::error::Error;
+use std::fmt;
 use std::io;
+use std::io::Result;
 
 /// Sync byte that wraps the data packet
 const FEND: u8 = 0x7E;
@@ -31,9 +67,16 @@ impl Frame {
 }
 
 /// Special Character structure for holding the encode and decode values
+///
+/// # Default
+///
+/// FEND  = 0x7E;
+/// FESC  = 0x7D;
+/// TFEND = 0x5E;
+/// TFESC = 0x5D;
 #[derive(Debug)]
 pub struct SpecialChars {
-    /// Frame END. Byte that marks the begining and end of a packet
+    /// Frame END. Byte that marks the beginning and end of a packet
     pub fend: u8,
     /// Frame ESCape. Byte that marks the start of a swap byte
     pub fesc: u8,
@@ -86,16 +129,19 @@ impl SpecialChars {
 /// ```
 pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     let mut set = HashSet::new();
-    if !set.insert(s_chars.fend)  ||
-       !set.insert(s_chars.fesc)  ||
-       !set.insert(s_chars.tfend) ||
-       !set.insert(s_chars.tfesc) {
-
-        return Err(io::Error::new(io::ErrorKind::Other, "[ERROR] Duplicate special character."));
+    if !set.insert(s_chars.fend)
+        || !set.insert(s_chars.fesc)
+        || !set.insert(s_chars.tfend)
+        || !set.insert(s_chars.tfesc)
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            HDLCError::DuplicateSpecialChar,
+        ));
     }
 
-    let mut frame = Frame::new();
-    let mut output = Vec::with_capacity(input.len());
+    let mut frame: Frame = Frame::new();
+    let mut output: Vec<u8> = Vec::with_capacity(input.len());
 
     for byte in input {
         // Handle the special escape characters
@@ -109,7 +155,7 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
         } else {
             // Match based on the special characters, but struct fields are not patterns and cant match
             if byte == s_chars.fend {
-                //If we are already synced, this is the closing sync char
+                // If we are already synced, this is the closing sync char
                 if frame.sync > 0 {
                     return Ok(output);
 
@@ -139,16 +185,18 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 ///
 /// Todo: Catch more errors, like an incomplete packet
 /// change the return type to a result
-pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Vec<u8> {
+pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
-    if !set.insert(s_chars.fend) || !set.insert(s_chars.fesc) || !set.insert(s_chars.tfend)
+    if !set.insert(s_chars.fend)
+        || !set.insert(s_chars.fesc)
+        || !set.insert(s_chars.tfend)
         || !set.insert(s_chars.tfesc)
     {
-        println!("ERROR!  Duplicate special character.  TODO - return error");
-        // TODO make then return an err. not an empty vec
-        let err_op = Vec::new();
-        return err_op;
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            HDLCError::DuplicateSpecialChar,
+        ));
     }
 
     let mut char_changed: u8 = 0;
@@ -172,7 +220,7 @@ pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Vec<u8> {
     println!("Changed {} bytes", char_changed);
 
     // Wrap the message in FENDs and return
-    wrap_fend(output, s_chars.fend)
+    Ok(wrap_fend(output, s_chars.fend))
 }
 
 fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
@@ -182,3 +230,41 @@ fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
     output.push(fend);
     output
 }
+
+/// Common Error for HDLC Actions.
+#[derive(Debug, PartialEq)]
+pub enum HDLCError {
+    /// Catches duplicate special characters.
+    DuplicateSpecialChar,
+}
+
+impl fmt::Display for HDLCError {
+    /// Formats the output for the error using the given formatter.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            HDLCError::DuplicateSpecialChar => write!(f, "Catches duplicate special characters."),
+        }
+    }
+}
+
+impl Error for HDLCError {
+    /// Returns a short description of the error.
+    fn description(&self) -> &str {
+        match *self {
+            HDLCError::DuplicateSpecialChar => "Catches duplicate special characters.",
+        }
+    }
+}
+
+/*
+impl fmt::Display for IridiumError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match self {
+            IridiumError::UartError { cause } => write!(f, "{}", cause),
+            IridiumError::PoisonError => write!(
+                f,
+                "The mutex guarding the RockBlock connection has been poisoned."
+            ),
+        }
+    }
+}*/
