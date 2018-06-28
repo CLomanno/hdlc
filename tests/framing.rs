@@ -1,37 +1,43 @@
-extern crate hdlc;
+extern crate hdlc_rust as hdlc;
 
 #[cfg(test)]
 mod tests {
-    use hdlc::hdlc::{decode, encode, SpecialChars};
+    use hdlc::{decode, encode, SpecialChars, HDLCError};
 
     #[test]
     fn packetizes() {
         let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
+        let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];
         let chars = SpecialChars::default();
 
-        assert_eq!(encode(msg, chars), [126, 1, 80, 0, 0, 0, 5, 128, 9, 126])
+        let result = encode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
     fn pack_byte_swaps() {
         let msg: Vec<u8> = vec![0x01, 0x7E, 0x00, 0x7D, 0x00, 0x05, 0x80, 0x09];
+        let cmp: Vec<u8> = vec![126, 1, 125, 94, 0, 125, 93, 0, 5, 128, 9, 126];
         let chars = SpecialChars::default();
 
-        assert_eq!(
-            encode(msg, chars),
-            [126, 1, 125, 94, 0, 125, 93, 0, 5, 128, 9, 126]
-        )
+        let result = encode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
     fn pack_custom_s_chars() {
-        let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
         let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x7D, 0x00, 0x05, 0x80, 0x09];
+        let cmp: Vec<u8> = vec![0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71];
+        let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
 
-        assert_eq!(
-            encode(msg, chars),
-            [0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71]
-        )
+        let result = encode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
@@ -39,17 +45,24 @@ mod tests {
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
-        assert_eq!(encode(msg, chars), [])
+        let result = encode(msg, chars);
+
+        assert!(result.is_err());
+        //assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
     }
 
     #[test]
     fn depacketizes() {
         let chars = SpecialChars::default();
         let msg: Vec<u8> = vec![
-            chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend
+            chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend,
         ];
+        let cmp: Vec<u8> = vec![1, 80, 0, 0, 0, 5, 128, 9];
 
-        assert_eq!(decode(msg, chars), [1, 80, 0, 0, 0, 5, 128, 9])
+        let result = decode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
@@ -69,8 +82,12 @@ mod tests {
             0x09,
             chars.fend,
         ];
+        let cmp: Vec<u8> = vec![1, 125, 0, 0, 126, 5, 128, 9];
 
-        assert_eq!(decode(msg, chars), [1, 125, 0, 0, 126, 5, 128, 9])
+        let result = decode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
@@ -90,8 +107,13 @@ mod tests {
             0x09,
             0x71,
         ];
+        let cmp: Vec<u8> = vec![1, 126, 0x71, 0, 5, 128, 0x70, 9];
 
-        assert_eq!(decode(msg, chars), [1, 126, 0x71, 0, 5, 128, 0x70, 9])
+
+        let result = decode(msg, chars);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), cmp)
     }
 
     #[test]
@@ -99,6 +121,9 @@ mod tests {
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
-        assert_eq!(decode(msg, chars), [])
+        let result = decode(msg, chars);
+
+        assert!(result.is_err());
+        //assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
     }
 }
