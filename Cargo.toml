@@ -1,6 +1,6 @@
 [package]
 name = "hdlc"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
 keywords = ["hdlc", "frame", "framing", "byte-swap"]
