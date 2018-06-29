@@ -1,5 +1,6 @@
 //! # hdlc
-//! Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
+//! Rust implementation of a High-level Data Link Control (HDLC) library with support of the
+//! IEEE standard.
 //!
 //! ## Usage
 //!
@@ -141,7 +142,7 @@ impl SpecialChars {
 ///
 /// # Error
 ///
-/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of 
+/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
 /// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 ///
 /// # Todo
@@ -206,7 +207,7 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 }
 
 /// Produces escaped (encoded) message surrounded with `FEND`
-/// 
+///
 /// # Inputs
 /// * **Vec<u8>**: A vector of the bytes you want to encode
 /// * **SpecialChars**: The special characters you want to swap
@@ -217,7 +218,7 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 ///
 /// # Error
 ///
-/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of 
+/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
 /// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 ///
 /// # Todo
