@@ -12,12 +12,12 @@
 Add `hdlc` to `Cargo.toml`
 ```toml
 [dependencies]
-hdlc = "^0.1.1"
+hdlc = "^0.1.3"
 ```
 or
 ```toml
 [dependencies.hdlc]
-git = "https://github.com/CLomanno/hdlc-rust"
+git = "https://github.com/CLomanno/hdlc"
 ```
 
 Add this to crate root
@@ -45,10 +45,12 @@ assert_eq!(result.unwrap(), cmp);
 extern crate hdlc;
 use hdlc::{SpecialChars, encode};
 
+// Set up your vector of bytes and generate your Special Characters
 let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x7D, 0x00, 0x05, 0x80, 0x09];
 let cmp: Vec<u8> = vec![0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71];
 let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
  
+// Encode your message
 let result = encode(msg, chars);
  
 assert!(result.is_ok());
@@ -60,10 +62,12 @@ assert_eq!(result.unwrap(), cmp)
 extern crate hdlc;
 use hdlc::{SpecialChars, decode};
 
+// Set up your vector of bytes and generate your Special Characters
 let chars = SpecialChars::default();
 let msg: Vec<u8> = vec![chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend];
 let cmp: Vec<u8> = vec![1, 80, 0, 0, 0, 5, 128, 9];
 
+// Decode your message
 let result = decode(msg, chars);
 
 assert!(result.is_ok());

@@ -1,4 +1,4 @@
-//! # hdlc-rust
+//! # hdlc
 //! Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
 //!
 //! ## Usage
@@ -129,18 +129,24 @@ impl SpecialChars {
     }
 }
 
-/// Produces unescaped message without `FEND` characters.
+/// Produces unescaped (decoded) message without `FEND` characters.
 ///
-/// Inputs: *Vec<u8>*: a vector of the bytes you want to decode
-/// Inputs: *SpecialChars*: the special characters you want to swap
+/// # Inputs
+/// * **Vec<u8>**: A vector of the bytes you want to decode
+/// * **SpecialChars**: The special characters you want to swap
 ///
-/// Returns: Decoded output message as `Result<Vec<u8>>`
+/// # Output
 ///
-/// Safety: Checks special characters for duplicates
+/// * **Result<Vec<u8>>**: Decoded output message
 ///
-/// Error: "Duplicate special character". If any of the `SpecialChars` are duplicate, throw an error
+/// # Error
 ///
-/// Todo: Catch more errors, like an incomplete packet
+/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of 
+/// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
+///
+/// # Todo
+///
+/// Catch more errors, like an incomplete packet
 ///
 /// # Example
 /// ```rust
@@ -199,18 +205,24 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     Ok(output)
 }
 
-/// Produces escaped and FEND surrounded message.
+/// Produces escaped (encoded) message surrounded with `FEND`
+/// 
+/// # Inputs
+/// * **Vec<u8>**: A vector of the bytes you want to encode
+/// * **SpecialChars**: The special characters you want to swap
 ///
-/// Inputs: **Vec<u8>**: A vector of the bytes you want to encode
-/// Inputs: **SpecialChars**: The special characters you want to swap
+/// # Output
 ///
-/// Returns: Encoded output message as `Result<Vec<u8>>`
+/// * **Result<Vec<u8>>**: Encoded output message
 ///
-/// Safety: Checks special characters for duplicates
+/// # Error
 ///
-/// Error: "Duplicate special character". If any of the `SpecialChars` are duplicate, throw an error
+/// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of 
+/// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 ///
-/// Todo: Catch more errors, like an incomplete packet
+/// # Todo
+///
+/// Catch more errors, like an incomplete packet
 ///
 /// # Example
 /// ```rust
@@ -260,8 +272,8 @@ fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
     output
 }
 
-/// Common error for HDLC actions.
 #[derive(Debug, PartialEq)]
+/// Common error for HDLC actions.
 pub enum HDLCError {
     /// Catches duplicate special characters.
     DuplicateSpecialChar,
