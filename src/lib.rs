@@ -2,14 +2,14 @@
 //! Rust implementation of a High-level Data Link Control (HDLC) library
 //!
 //! ## Usage
-//! 
+//!
 //! ### Encode packet
 //! ```rust
-//!extern crate hdlc;
+//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
-//! let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];;
+//! let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];
 //! let chars = SpecialChars::default();
 //!
 //! let result = encode(msg, chars);
@@ -20,19 +20,19 @@
 //!
 //! ### Custom Special Characters
 //! ```rust
-//!extern crate hdlc;
+//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x7D, 0x00, 0x05, 0x80, 0x09];
 //! let cmp: Vec<u8> = vec![0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71];
 //! let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
-//! 
+//!
 //! let result = encode(msg, chars);
-//! 
+//!
 //! assert!(result.is_ok());
 //! assert_eq!(result.unwrap(), cmp)
 //! ```
-//! 
+//!
 //! ### Decode packet
 //! ```rust
 //! extern crate hdlc;

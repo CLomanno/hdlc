@@ -31,7 +31,7 @@ use hdlc::{SpecialChars, encode};
 
 // Set up your vector of bytes and generate your Special Characters
 let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
-let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];;
+let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];
 let chars = SpecialChars::default();
 
 // Encode your message
