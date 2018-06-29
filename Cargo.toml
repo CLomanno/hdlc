@@ -1,9 +1,9 @@
 [package]
-name = "hdlc-rust"
+name = "hdlc"
 version = "0.1.0"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
-keywords = ["hdlc", "data link control", "frame", "framing"]
+keywords = ["hdlc", "data link control", "frame", "framing", "byte-swap"]
 readme = "README.md"
 repository = "https://github.com/CLomanno/hdlc-rust"
 license = "MIT OR Apache-2.0"

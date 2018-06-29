@@ -2,32 +2,52 @@
 //! Rust implementation of a High-level Data Link Control (HDLC) library
 //!
 //! ## Usage
+//! 
 //! ### Encode packet
 //! ```rust
-//! extern crate hdlc-rust;
+//!extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
-//! let chars = hdlc::SpecialChars::default();
+//! let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];;
+//! let chars = SpecialChars::default();
 //!
-//! assert_eq!(
-//!     hdlc::encode(msg, chars),
-//!     [126, 1, 80, 0, 0, 0, 5, 128, 9, 126]
-//! )
+//! let result = encode(msg, chars);
+//!
+//! assert!(result.is_ok());
+//! assert_eq!(result.unwrap(), cmp);
 //! ```
 //!
+//! //! ### Custom Special Characters
+//! ```rust
+//!extern crate hdlc;
+//! use hdlc::{SpecialChars, encode};
+//!
+//! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x7D, 0x00, 0x05, 0x80, 0x09];
+//! let cmp: Vec<u8> = vec![0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71];
+//! let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
+//! 
+//! let result = encode(msg, chars);
+//! 
+//! assert!(result.is_ok());
+//! assert_eq!(result.unwrap(), cmp)
+//! ```
+//! 
 //! ### Decode packet
 //! ```rust
-//! extern crate hdlc_rust;
+//! extern crate hdlc;
 //! use hdlc::{SpecialChars, decode};
 //!
-//! let chars = hdlc::SpecialChars::default();
+//! let chars = SpecialChars::default();
 //! let msg: Vec<u8> = vec![
-//!     chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend
+//!     chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend,
 //! ];
-//! assert_eq!(hdlc::decode(msg, chars),
-//!     [1, 80, 0, 0, 0, 5, 128, 9]
-//! )
+//! let cmp: Vec<u8> = vec![1, 80, 0, 0, 0, 5, 128, 9];
+//!
+//! let result = decode(msg, chars);
+//!
+//! assert!(result.is_ok());
+//! assert_eq!(result.unwrap(), cmp);
 //! ```
 
 #![deny(missing_docs)]
@@ -40,13 +60,13 @@ use std::io;
 use std::io::Result;
 
 /// Sync byte that wraps the data packet
-const FEND: u8 = 0x7E;
+pub const FEND: u8 = 0x7E;
 /// Substitution character
-const FESC: u8 = 0x7D;
+pub const FESC: u8 = 0x7D;
 /// Substituted for FEND
-const TFEND: u8 = 0x5E;
+pub const TFEND: u8 = 0x5E;
 /// Substituted for FESC
-const TFESC: u8 = 0x5D;
+pub const TFESC: u8 = 0x5D;
 
 /// Frame structure holds data to help decode packets
 struct Frame {
@@ -114,7 +134,7 @@ impl SpecialChars {
 /// Inputs: *Vec<u8>*: a vector of the bytes you want to decode
 /// Inputs: *SpecialChars*: the special characters you want to swap
 ///
-/// Returns: output message as `Result<Vec<u8>>`
+/// Returns: Decoded output message as `Result<Vec<u8>>`
 ///
 /// Safety: Checks special characters for duplicates
 ///
@@ -124,7 +144,9 @@ impl SpecialChars {
 ///
 /// # Example
 /// ```rust
+/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
+/// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode(input.to_vec(), chars);
 /// ```
 pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
@@ -179,12 +201,24 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 
 /// Produces escaped and FEND surrounded message.
 ///
-/// Returns: output message as Vec<u8>
+/// Inputs: *Vec<u8>*: A vector of the bytes you want to encode
+/// Inputs: *SpecialChars*: The special characters you want to swap
+///
+/// Returns: Decoded output message as `Result<Vec<u8>>`
 ///
 /// Safety: Checks special characters for duplicates
 ///
+/// Error: "Duplicate special character". If any of the `SpecialChars` are duplicate, throw an error
+///
 /// Todo: Catch more errors, like an incomplete packet
-/// change the return type to a result
+///
+/// # Example
+/// ```rust
+/// extern crate hdlc;
+/// let chars = hdlc::SpecialChars::default();
+/// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
+/// let op_vec = hdlc::encode(input.to_vec(), chars);
+/// ```
 pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
@@ -199,7 +233,6 @@ pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
         ));
     }
 
-    let mut char_changed: u8 = 0;
     let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
 
     // As of 4/24/18 Stuct fields are not patterns and cannot be match arms.
@@ -207,17 +240,13 @@ pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
         if i == s_chars.fend {
             output.push(s_chars.fesc);
             output.push(s_chars.tfend);
-            char_changed += 2;
         } else if i == s_chars.fesc {
             output.push(s_chars.fesc);
             output.push(s_chars.tfesc);
-            char_changed += 2;
         } else {
             output.push(i);
         }
     }
-
-    println!("Changed {} bytes", char_changed);
 
     // Wrap the message in FENDs and return
     Ok(wrap_fend(output, s_chars.fend))

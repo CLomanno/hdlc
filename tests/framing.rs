@@ -1,4 +1,4 @@
-extern crate hdlc_rust as hdlc;
+extern crate hdlc;
 
 #[cfg(test)]
 mod tests {
@@ -42,13 +42,18 @@ mod tests {
 
     #[test]
     fn pack_rejects_dupe_s_chars() {
+        use std::error::Error;
+
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
         let result = encode(msg, chars);
 
         assert!(result.is_err());
-        //assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
+        assert_eq!(
+            result.unwrap_err().description(),
+            HDLCError::DuplicateSpecialChar.description()
+        )
     }
 
     #[test]
@@ -117,12 +122,17 @@ mod tests {
 
     #[test]
     fn depack_rejects_dupe_s_chars() {
+        use std::error::Error;
+
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
         let result = decode(msg, chars);
 
         assert!(result.is_err());
-        //assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
+        assert_eq!(
+            result.unwrap_err().description(),
+            HDLCError::DuplicateSpecialChar.description()
+        )
     }
 }
