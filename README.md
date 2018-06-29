@@ -1,4 +1,4 @@
-# hdlc [![Build Status](https://travis-ci.org/CLomanno/hdlc-rust.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc-rust)
+# hdlc [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
 
 # hdlc
 > Rust implementation of HDLC with support of the IEEE standard
