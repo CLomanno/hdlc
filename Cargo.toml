@@ -1,10 +1,10 @@
 [package]
 name = "hdlc"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
 keywords = ["hdlc", "frame", "framing", "byte-swap"]
 readme = "README.md"
-repository = "https://github.com/CLomanno/hdlc-rust"
+repository = "https://github.com/CLomanno/hdlct"
 documentation = "https://docs.rs/hdlc"
 license = "MIT OR Apache-2.0"

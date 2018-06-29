@@ -1,5 +1,5 @@
 //! # hdlc-rust
-//! Rust implementation of a High-level Data Link Control (HDLC) library
+//! Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
 //!
 //! ## Usage
 //!
@@ -90,10 +90,10 @@ impl Frame {
 ///
 /// # Default
 ///
-/// FEND  = 0x7E;
-/// FESC  = 0x7D;
-/// TFEND = 0x5E;
-/// TFESC = 0x5D;
+/// * **FEND**  = 0x7E;
+/// * **FESC**  = 0x7D;
+/// * **TFEND** = 0x5E;
+/// * **TFESC** = 0x5D;
 #[derive(Debug)]
 pub struct SpecialChars {
     /// Frame END. Byte that marks the beginning and end of a packet
@@ -201,10 +201,10 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 
 /// Produces escaped and FEND surrounded message.
 ///
-/// Inputs: *Vec<u8>*: A vector of the bytes you want to encode
-/// Inputs: *SpecialChars*: The special characters you want to swap
+/// Inputs: **Vec<u8>**: A vector of the bytes you want to encode
+/// Inputs: **SpecialChars**: The special characters you want to swap
 ///
-/// Returns: Decoded output message as `Result<Vec<u8>>`
+/// Returns: Encoded output message as `Result<Vec<u8>>`
 ///
 /// Safety: Checks special characters for duplicates
 ///
@@ -260,7 +260,7 @@ fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
     output
 }
 
-/// Common Error for HDLC Actions.
+/// Common error for HDLC actions.
 #[derive(Debug, PartialEq)]
 pub enum HDLCError {
     /// Catches duplicate special characters.
@@ -284,16 +284,3 @@ impl Error for HDLCError {
         }
     }
 }
-
-/*
-impl fmt::Display for IridiumError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        match self {
-            IridiumError::UartError { cause } => write!(f, "{}", cause),
-            IridiumError::PoisonError => write!(
-                f,
-                "The mutex guarding the RockBlock connection has been poisoned."
-            ),
-        }
-    }
-}*/

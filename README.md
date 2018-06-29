@@ -1,7 +1,7 @@
 # hdlc [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
 
 # hdlc
-> Rust implementation of HDLC with support of the IEEE standard
+> Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
 
 * [Crate](https://crates.io/crates/hdlc)
 * [Documentation](https://docs.rs/hdlc/)
