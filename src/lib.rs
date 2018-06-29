@@ -18,7 +18,7 @@
 //! assert_eq!(result.unwrap(), cmp);
 //! ```
 //!
-//! //! ### Custom Special Characters
+//! ### Custom Special Characters
 //! ```rust
 //!extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
