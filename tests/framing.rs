@@ -135,4 +135,58 @@ mod tests {
             HDLCError::DuplicateSpecialChar.description()
         )
     }
+
+    #[test]
+    fn depack_rejects_stray_fend_char() {
+        use std::error::Error;
+
+        let chars = SpecialChars::default();
+        let msg: Vec<u8> = vec![
+            chars.fend, 0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09, chars.fend,
+        ];
+
+        let result = decode(&msg, chars);
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().description(),
+            HDLCError::SyncCharInData.description()
+        )
+    }
+
+    #[test]
+    fn depack_rejects_stray_fesc_char() {
+        use std::error::Error;
+
+        let chars = SpecialChars::default();
+        let msg: Vec<u8> = vec![
+            chars.fend, 0x01, chars.fesc, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09, chars.fend,
+        ];
+
+        let result = decode(&msg, chars);
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().description(),
+            HDLCError::MissingTradeChar.description()
+        )
+    }
+
+    #[test]
+    fn depack_rejects_incomplete_message() {
+        use std::error::Error;
+
+        let chars = SpecialChars::default();
+        let msg: Vec<u8> = vec![
+            chars.fend, 0x01, chars.fesc, chars.tfesc, 0x77, 0x00, 0x05, 0x80, 0x09
+        ];
+
+        let result = decode(&msg, chars);
+
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().description(),
+            HDLCError::MissingFinalFEND.description()
+        )
+    }
 }
