@@ -56,35 +56,6 @@ use std::collections::HashSet;
 use std::default::Default;
 use std::error::Error;
 use std::fmt;
-use std::io;
-use std::io::Result;
-
-/// Sync byte that wraps the data packet
-pub const FEND: u8 = 0x7E;
-/// Substitution character
-pub const FESC: u8 = 0x7D;
-/// Substituted for FEND
-pub const TFEND: u8 = 0x5E;
-/// Substituted for FESC
-pub const TFESC: u8 = 0x5D;
-
-/// Frame structure holds data to help decode packets
-struct Frame {
-    last_was_fesc: u8,
-    last_was_fend: u8,
-    sync: u8,
-}
-
-impl Frame {
-    /// Creates a new Frame structure for decoding a packet
-    fn new() -> Frame {
-        Frame {
-            last_was_fesc: 0,
-            last_was_fend: 0,
-            sync: 0,
-        }
-    }
-}
 
 /// Special Character structure for holding the encode and decode values
 ///
@@ -110,10 +81,10 @@ impl Default for SpecialChars {
     /// Creates the default SpecialChars structure for encoding/decoding a packet
     fn default() -> SpecialChars {
         SpecialChars {
-            fend: FEND,
-            fesc: FESC,
-            tfend: TFEND,
-            tfesc: TFESC,
+            fend: 0x7E,
+            fesc: 0x7D,
+            tfend: 0x5E,
+            tfesc: 0x5D,
         }
     }
 }
@@ -160,62 +131,55 @@ impl SpecialChars {
 /// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode(&input.to_vec(), chars);
 /// ```
-pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
+pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
         || !set.insert(s_chars.fesc)
         || !set.insert(s_chars.tfend)
         || !set.insert(s_chars.tfesc)
     {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
+        return Err(
             HDLCError::DuplicateSpecialChar,
-        ));
+        );
     }
 
+    let mut sync = 0;
+    let mut last_was_fesc = 0;
     let input_length = input.len();
-
-    let mut frame: Frame = Frame::new();
     let mut output: Vec<u8> = Vec::with_capacity(input_length);
 
     for byte in input {
         // Handle the special escape characters
-        if frame.last_was_fesc > 0 {
+        if last_was_fesc > 0 {
             if *byte == s_chars.tfesc {
                 output.push(s_chars.fesc);
             } else if *byte == s_chars.tfend {
                 output.push(s_chars.fend);
             } else {
-                return Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    HDLCError::MissingTradeChar,
-                ));
+                return Err(HDLCError::MissingTradeChar);
             }
-            frame.last_was_fesc = 0
+            last_was_fesc = 0
         } else {
             // Match based on the special characters, but struct fields are not patterns and cant match
             if *byte == s_chars.fend {
                 // If we are already synced, this is the closing sync char
-                if frame.sync > 0 {
+                if sync > 0 {
                     // Check to make sure the full message was decoded
                     if output.len() < ((input.len() / 2) - 1) {
-                        return Err(io::Error::new(
-                            io::ErrorKind::Other,
+                        return Err(
                             HDLCError::SyncCharInData,
-                        ));
+                        );
                     }
                     return Ok(output);
 
                 // Todo: Maybe save for a 2nd message?  I currently throw an error above
                 } else {
-                    frame.sync = 1;
+                    sync = 1;
                 }
-                frame.last_was_fend = 0;
             } else if *byte == s_chars.fesc {
-                frame.last_was_fesc = 1;
+                last_was_fesc = 1;
             } else {
-                if frame.sync > 0 {
-                    frame.last_was_fend = 0;
+                if sync > 0 {
                     output.push(*byte);
                 }
             }
@@ -223,10 +187,9 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     }
 
     // Missing a final sync character
-    return Err(io::Error::new(
-        io::ErrorKind::Other,
+    return Err(
         HDLCError::MissingFinalFEND,
-    ));
+    );
 }
 
 /// Produces escaped (encoded) message surrounded with `FEND`
@@ -255,7 +218,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 /// let op_vec = hdlc::encode(&input.to_vec(), chars);
 /// ```
-pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
+pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
@@ -263,10 +226,9 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
         || !set.insert(s_chars.tfend)
         || !set.insert(s_chars.tfesc)
     {
-        return Err(io::Error::new(
-            io::ErrorKind::Other,
-            HDLCError::DuplicateSpecialChar,
-        ));
+        return Err(
+            HDLCError::DuplicateSpecialChar
+        );
     }
 
     let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
