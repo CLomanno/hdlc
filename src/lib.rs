@@ -10,10 +10,9 @@
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
-//! let cmp: Vec<u8> = vec![126, 1, 80, 0, 0, 0, 5, 128, 9, 126];
-//! let chars = SpecialChars::default();
+//! let cmp: Vec<u8> = vec![0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 //!
-//! let result = encode(msg, chars);
+//! let result = encode(&msg, SpecialChars::default());
 //!
 //! assert!(result.is_ok());
 //! assert_eq!(result.unwrap(), cmp);
@@ -24,11 +23,11 @@
 //! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
-//! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x7D, 0x00, 0x05, 0x80, 0x09];
-//! let cmp: Vec<u8> = vec![0x71, 1, 126, 112, 80, 125, 0, 5, 128, 9, 0x71];
+//! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x50, 0x00, 0x05, 0x80, 0x09];
+//! let cmp: Vec<u8> = vec![0x71, 0x01, 0x7E, 0x70, 0x50, 0x50, 0x00, 0x05, 0x80, 0x09, 0x71];
 //! let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
 //!
-//! let result = encode(msg, chars);
+//! let result = encode(&msg, chars);
 //!
 //! assert!(result.is_ok());
 //! assert_eq!(result.unwrap(), cmp)
@@ -43,9 +42,9 @@
 //! let msg: Vec<u8> = vec![
 //!     chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend,
 //! ];
-//! let cmp: Vec<u8> = vec![1, 80, 0, 0, 0, 5, 128, 9];
+//! let cmp: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 //!
-//! let result = decode(msg, chars);
+//! let result = decode(&msg, chars);
 //!
 //! assert!(result.is_ok());
 //! assert_eq!(result.unwrap(), cmp);
@@ -154,9 +153,9 @@ impl SpecialChars {
 /// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
-/// let op_vec = hdlc::decode(input.to_vec(), chars);
+/// let op_vec = hdlc::decode(&input.to_vec(), chars);
 /// ```
-pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
+pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
         || !set.insert(s_chars.fesc)
@@ -175,15 +174,15 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     for byte in input {
         // Handle the special escape characters
         if frame.last_was_fesc > 0 {
-            if byte == s_chars.tfesc {
+            if *byte == s_chars.tfesc {
                 output.push(s_chars.fesc);
-            } else if byte == s_chars.tfend {
+            } else if *byte == s_chars.tfend {
                 output.push(s_chars.fend);
             }
             frame.last_was_fesc = 0
         } else {
             // Match based on the special characters, but struct fields are not patterns and cant match
-            if byte == s_chars.fend {
+            if *byte == s_chars.fend {
                 // If we are already synced, this is the closing sync char
                 if frame.sync > 0 {
                     return Ok(output);
@@ -193,12 +192,12 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
                     frame.sync = 1;
                 }
                 frame.last_was_fend = 0;
-            } else if byte == s_chars.fesc {
+            } else if *byte == s_chars.fesc {
                 frame.last_was_fesc = 1;
             } else {
                 if frame.sync > 0 {
                     frame.last_was_fend = 0;
-                    output.push(byte);
+                    output.push(*byte);
                 }
             }
         }
@@ -230,9 +229,9 @@ pub fn decode(input: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 /// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
-/// let op_vec = hdlc::encode(input.to_vec(), chars);
+/// let op_vec = hdlc::encode(&input.to_vec(), chars);
 /// ```
-pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
+pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
@@ -248,29 +247,24 @@ pub fn encode(data: Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>> {
 
     let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
 
+    output.push(s_chars.fend);
+
     // As of 4/24/18 Stuct fields are not patterns and cannot be match arms.
     for i in data {
-        if i == s_chars.fend {
+        if *i == s_chars.fend {
             output.push(s_chars.fesc);
             output.push(s_chars.tfend);
-        } else if i == s_chars.fesc {
+        } else if *i == s_chars.fesc {
             output.push(s_chars.fesc);
             output.push(s_chars.tfesc);
         } else {
-            output.push(i);
+            output.push(*i);
         }
     }
 
     // Wrap the message in FENDs and return
-    Ok(wrap_fend(output, s_chars.fend))
-}
-
-fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
-    let mut output = Vec::with_capacity(data.len() + 2);
-    output.push(fend);
-    output.append(&mut data);
-    output.push(fend);
-    output
+    output.push(s_chars.fend);
+    Ok(output)
 }
 
 #[derive(Debug, PartialEq)]
@@ -278,13 +272,19 @@ fn wrap_fend(mut data: Vec<u8>, fend: u8) -> Vec<u8> {
 pub enum HDLCError {
     /// Catches duplicate special characters.
     DuplicateSpecialChar,
+    /// Catches a random sync char in the data
+    SyncCharInData,
+    /// Catches a random swap char in the data
+    SwapCharInData,
 }
 
 impl fmt::Display for HDLCError {
     /// Formats the output for the error using the given formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            HDLCError::DuplicateSpecialChar => write!(f, "Catches duplicate special characters."),
+            HDLCError::DuplicateSpecialChar => write!(f, "Caught a duplicate special character."),
+            HDLCError::SyncCharInData => write!(f, "Caught a random sync char in the data."),
+            HDLCError::SwapCharInData => write!(f, "Caught a random swap char in the data."),
         }
     }
 }
@@ -293,7 +293,9 @@ impl Error for HDLCError {
     /// Returns a short description of the error.
     fn description(&self) -> &str {
         match *self {
-            HDLCError::DuplicateSpecialChar => "Catches duplicate special characters.",
+            HDLCError::DuplicateSpecialChar => "Caught a duplicate special character.",
+            HDLCError::SyncCharInData => "Caught a random sync char in the data.",
+            HDLCError::SwapCharInData => "Caught a random swap char in the data.",
         }
     }
 }
