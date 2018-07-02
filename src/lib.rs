@@ -138,9 +138,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
         || !set.insert(s_chars.tfend)
         || !set.insert(s_chars.tfesc)
     {
-        return Err(
-            HDLCError::DuplicateSpecialChar,
-        );
+        return Err(HDLCError::DuplicateSpecialChar);
     }
 
     let mut sync = 0;
@@ -166,9 +164,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
                 if sync > 0 {
                     // Check to make sure the full message was decoded
                     if output.len() < ((input.len() / 2) - 1) {
-                        return Err(
-                            HDLCError::SyncCharInData,
-                        );
+                        return Err(HDLCError::SyncCharInData);
                     }
                     return Ok(output);
 
@@ -187,9 +183,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
     }
 
     // Missing a final sync character
-    return Err(
-        HDLCError::MissingFinalFEND,
-    );
+    return Err(HDLCError::MissingFinalFEND);
 }
 
 /// Produces escaped (encoded) message surrounded with `FEND`
@@ -226,9 +220,7 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
         || !set.insert(s_chars.tfend)
         || !set.insert(s_chars.tfesc)
     {
-        return Err(
-            HDLCError::DuplicateSpecialChar
-        );
+        return Err(HDLCError::DuplicateSpecialChar);
     }
 
     let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
