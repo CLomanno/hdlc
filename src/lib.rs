@@ -57,7 +57,8 @@ use std::default::Default;
 use std::error::Error;
 use std::fmt;
 
-/// Special Character structure for holding the encode and decode values
+/// Special Character structure for holding the encode and decode values.
+/// IEEE standard values are defined below in Default.
 ///
 /// # Default
 ///

@@ -12,7 +12,7 @@
 Add `hdlc` to `Cargo.toml`
 ```toml
 [dependencies]
-hdlc = "^0.1.3"
+hdlc = "^0.2.0"
 ```
 or
 ```toml
@@ -82,13 +82,13 @@ assert_eq!(result.unwrap(), cmp);
 `cargo bench` with 2.2 GHz Intel Core i7 results ~430MB/s throughput.
 ```
 cargo bench
-     Running target\release\deps\bench-73fbb072430ecd9b.exe
+     Running target\release\deps\bench-8475e9ff4a76b8c6.exe
 
 running 4 tests
-test bench_decode_megabyte                  ... bench:   2,031,889 ns/iter (+/- 85,182)
-test bench_decode_special_chars_2_megabytes ... bench:   5,947,715 ns/iter (+/- 137,189)
-test bench_encode_megabyte                  ... bench:   2,422,429 ns/iter (+/- 71,546)
-test bench_encode_special_chars_megabyte    ... bench:   5,684,812 ns/iter (+/- 233,050)
+test bench_decode_megabyte                  ... bench:   2,068,254 ns/iter (+/- 159,469)
+test bench_decode_special_chars_2_megabytes ... bench:   5,586,588 ns/iter (+/- 119,725)
+test bench_encode_megabyte                  ... bench:   2,415,257 ns/iter (+/- 219,049)
+test bench_encode_special_chars_megabyte    ... bench:   5,715,299 ns/iter (+/- 400,649)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 ```
