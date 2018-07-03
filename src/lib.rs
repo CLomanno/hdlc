@@ -141,12 +141,15 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
         return Err(HDLCError::DuplicateSpecialChar);
     }
 
+    // Define the counting variables for proper loop functionality
     let mut sync = 0;
     let mut last_was_fesc = 0;
     let input_length = input.len();
+
+    // Predefine the vector for speed
     let mut output: Vec<u8> = Vec::with_capacity(input_length);
 
-    for byte in input {
+    for (index, byte) in input.into_iter().enumerate() {
         // Handle the special escape characters
         if last_was_fesc > 0 {
             if *byte == s_chars.tfesc {
@@ -163,7 +166,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
                 // If we are already synced, this is the closing sync char
                 if sync > 0 {
                     // Check to make sure the full message was decoded
-                    if output.len() < ((input.len() / 2) - 1) {
+                    if (index + 1) < input_length {
                         return Err(HDLCError::SyncCharInData);
                     }
                     return Ok(output);

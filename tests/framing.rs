@@ -142,7 +142,7 @@ mod tests {
 
         let chars = SpecialChars::default();
         let msg: Vec<u8> = vec![
-            chars.fend, 0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09, chars.fend,
+            chars.fend, 0x01, 0x00, 0x69, 0x00, 0x05, 0x80, 0x09, chars.fend, chars.fend,
         ];
 
         let result = decode(&msg, chars);
