@@ -115,11 +115,11 @@ impl SpecialChars {
 ///
 /// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
 /// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
-/// * **HDLCError::SyncCharInData**: Checks to make sure the full decoded message is the full
+/// * **HDLCError::FendCharInData**: Checks to make sure the full decoded message is the full
 /// length.  Found the `SpecialChars::fend` inside the message.
 /// * **HDLCError::MissingTradeChar**: Checks to make sure every frame escape character `fesc`
 /// is followed by either a `tfend` or a `tfesc`.
-/// * **HDLCError::MissingFinalFEND**: Input vector is missing a final `SpecialChars::fend`
+/// * **HDLCError::MissingFinalFend**: Input vector is missing a final `SpecialChars::fend`
 ///
 /// # Todo
 ///
@@ -133,6 +133,7 @@ impl SpecialChars {
 /// let op_vec = hdlc::decode(&input.to_vec(), chars);
 /// ```
 pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
+    // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
         || !set.insert(s_chars.fesc)
@@ -168,7 +169,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
                 if sync > 0 {
                     // Check to make sure the full message was decoded
                     if (index + 1) < input_length {
-                        return Err(HDLCError::SyncCharInData);
+                        return Err(HDLCError::FendCharInData);
                     }
                     return Ok(output);
 
@@ -187,7 +188,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
     }
 
     // Missing a final sync character
-    return Err(HDLCError::MissingFinalFEND);
+    return Err(HDLCError::MissingFinalFend);
 }
 
 /// Produces escaped (encoded) message surrounded with `FEND`
@@ -227,11 +228,13 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
         return Err(HDLCError::DuplicateSpecialChar);
     }
 
+    // Prealocate for speed
     let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
 
+    //Push initial FEND
     output.push(s_chars.fend);
 
-    // As of 4/24/18 Stuct fields are not patterns and cannot be match arms.
+    // As of 7/2/18 Stuct fields are not patterns and cannot be match arms.
     for i in data {
         if *i == s_chars.fend {
             output.push(s_chars.fesc);
@@ -244,8 +247,9 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
         }
     }
 
-    // Wrap the message in FENDs and return
+    // Push final FEND
     output.push(s_chars.fend);
+
     Ok(output)
 }
 
@@ -255,11 +259,11 @@ pub enum HDLCError {
     /// Catches duplicate special characters.
     DuplicateSpecialChar,
     /// Catches a random sync char in the data.
-    SyncCharInData,
+    FendCharInData,
     /// Catches a random swap char, `fesc`, in the data with no `tfend` or `tfesc`.
     MissingTradeChar,
     /// No final fend on the message.
-    MissingFinalFEND,
+    MissingFinalFend,
 }
 
 impl fmt::Display for HDLCError {
@@ -267,9 +271,9 @@ impl fmt::Display for HDLCError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             HDLCError::DuplicateSpecialChar => write!(f, "Caught a duplicate special character."),
-            HDLCError::SyncCharInData => write!(f, "Caught a random sync char in the data."),
+            HDLCError::FendCharInData => write!(f, "Caught a random sync char in the data."),
             HDLCError::MissingTradeChar => write!(f, "Caught a random swap char in the data."),
-            HDLCError::MissingFinalFEND => write!(f, "Missing final FEND character."),
+            HDLCError::MissingFinalFend => write!(f, "Missing final FEND character."),
         }
     }
 }
@@ -279,9 +283,75 @@ impl Error for HDLCError {
     fn description(&self) -> &str {
         match *self {
             HDLCError::DuplicateSpecialChar => "Caught a duplicate special character.",
-            HDLCError::SyncCharInData => "Caught a random sync char in the data.",
+            HDLCError::FendCharInData => "Caught a random sync char in the data.",
             HDLCError::MissingTradeChar => "Caught a random swap char in the data.",
-            HDLCError::MissingFinalFEND => "Missing final FEND character.",
+            HDLCError::MissingFinalFend => "Missing final FEND character.",
         }
     }
+}
+
+/// Decode a slice and return a slice
+pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HDLCError> {
+    // Safety check to make sure the special character values are all unique
+    let mut set = HashSet::new();
+    if !set.insert(s_chars.fend)
+        || !set.insert(s_chars.fesc)
+        || !set.insert(s_chars.tfend)
+        || !set.insert(s_chars.tfesc)
+    {
+        return Err(HDLCError::DuplicateSpecialChar);
+    }
+
+    // Define the counting variables for proper loop functionality
+    let mut sync = 0;
+    let mut swap = 0;
+    let mut last_was_fesc = 0;
+    let input_length = input.len();
+    
+// Predefine the vector for iterator
+    let mut output: Vec<u8> = Vec::with_capacity(input_length);
+    output.extend_from_slice(input);
+
+    for (index, byte) in output.iter().enumerate() {
+//        println!("D={}, B={} S={}  Output{:?}", index, byte, swap, input);
+        // Handle the special escape characters
+        if last_was_fesc > 0 {
+            if *byte == s_chars.tfesc {
+                swap = swap + 1;
+                input[index - swap - 1] = s_chars.fesc;
+            } else if *byte == s_chars.tfend {
+                swap = swap + 1;
+                input[index - swap - 1] = s_chars.fend;
+            } else {
+                return Err(HDLCError::MissingTradeChar);    
+            }
+            last_was_fesc = 0
+        } else {
+            // Match based on the special characters, but struct fields are not patterns and cant match
+            if *byte == s_chars.fend {
+                // If we are already synced, this is the closing sync char
+                if sync > 0 {
+                    // Check to make sure the full message was decoded
+                    if (index + 1) < input_length {
+                        return Err(HDLCError::FendCharInData);
+                    }
+                    // Minus 2 for both FEND
+                    let end = index - swap - 1;
+                    return Ok(&input[..end]);
+
+                // Todo: Maybe save for a 2nd message?  I currently throw an error above
+                } else {
+                    sync = 1;
+                }
+            } else if *byte == s_chars.fesc {
+                last_was_fesc = 1;
+            } else {
+                if sync > 0 {
+                    input[index - swap - 1] = *byte;
+                }
+            }
+        }
+    }
+
+    return Err(HDLCError::MissingFinalFend);
 }

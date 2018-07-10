@@ -2,7 +2,7 @@
 extern crate hdlc;
 extern crate test;
 
-use hdlc::{decode, encode, SpecialChars};
+use hdlc::{decode, decode_slice, encode, SpecialChars};
 use test::Bencher;
 
 #[bench]
@@ -10,6 +10,7 @@ fn bench_encode_megabyte(b: &mut Bencher) {
     let bytes = Box::new(vec![0u8; 1_000_000]);
     b.iter(|| encode(&*bytes, SpecialChars::default()));
 }
+
 #[bench]
 fn bench_decode_megabyte(b: &mut Bencher) {
     let mut bytes = Box::new(vec![0u8; 1_000_000]);
