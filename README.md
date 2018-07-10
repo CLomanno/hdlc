@@ -1,6 +1,7 @@
 # hdlc [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
 
-# hdlc
+## hdlc
+
 > Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
 
 * [Crate](https://crates.io/crates/hdlc)
@@ -9,22 +10,29 @@
 * [License](#license)
 
 ## Usage
+
 Add `hdlc` to `Cargo.toml`
+
 ```toml
 [dependencies]
-hdlc = "^0.2.0"
+hdlc = "^0.2.1"
 ```
+
 or
+
 ```toml
 [dependencies.hdlc]
 git = "https://github.com/CLomanno/hdlc"
 ```
 
 Add this to crate root
+
 ```rust
 extern crate hdlc;
 ```
+
 ### Encode packet
+
 ```rust
 extern crate hdlc;
 use hdlc::{SpecialChars, encode};
@@ -39,7 +47,9 @@ let result = encode(&msg, SpecialChars::default());
 assert!(result.is_ok());
 assert_eq!(result.unwrap(), cmp);
 ```
+
 ### Custom Special Characters
+
 ```rust
 extern crate hdlc;
 use hdlc::{SpecialChars, encode};
@@ -49,16 +59,15 @@ let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x50, 0x00, 0x05, 0x80, 0x09];
 let cmp: Vec<u8> = vec![0x71, 0x01, 0x7E, 0x70, 0x50, 0x50, 0x00, 0x05, 0x80, 0x09, 0x71];
 let chars = SpecialChars::new(0x71, 0x70, 0x51, 0x50);
 
-let result = encode(&msg, chars);
- 
 // Encode your message
 let result = encode(&msg, chars);
- 
+
 assert!(result.is_ok());
 assert_eq!(result.unwrap(), cmp)
 ```
- 
+
 ### Decode packet
+
 ```rust
 extern crate hdlc;
 use hdlc::{SpecialChars, decode};
@@ -76,11 +85,33 @@ assert!(result.is_ok());
 assert_eq!(result.unwrap(), cmp);
 ```
 
+### Decode slice packet
+
+```rust
+extern crate hdlc;
+use hdlc::{SpecialChars, decode_slice};
+
+// Set up your mutable slice of bytes and generate your Special Characters
+let chars = SpecialChars::default();
+let mut msg = [
+    chars.fend, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, chars.fend,
+];
+let cmp = [0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
+
+// Decode your slice
+let result = decode_slice(&mut msg, chars);
+
+assert!(result.is_ok());
+assert_eq!(result.unwrap(), cmp);
+```
+
 ## Benchmark
+
 > Bencher is currently not available in Rust stable releases.
 
 `cargo bench` with 2.2 GHz Intel Core i7 results ~430MB/s throughput.
-```
+
+```rust
 cargo bench
      Running target\release\deps\bench-8475e9ff4a76b8c6.exe
 
@@ -97,8 +128,8 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 
 Licensed under either of
 
- * Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+* MIT License ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
