@@ -2,7 +2,7 @@
 extern crate hdlc;
 extern crate test;
 
-use hdlc::{decode, decode_slice, encode, SpecialChars};
+use hdlc::{decode, encode, SpecialChars};
 use test::Bencher;
 
 #[bench]
@@ -19,19 +19,25 @@ fn bench_decode_megabyte(b: &mut Bencher) {
     b.iter(|| decode(&*bytes, SpecialChars::default()));
 }
 
-#[bench]
-fn bench_decode_slice_megabyte<'a>(b: &'a mut Bencher) {
-    let mut bytes: Box<&'a mut [u8; 1_000_000]> = Box::new(&mut [0u8; 1_000_000]);
-    bytes[0] = 0x7E;
-    bytes[999_999] = 0x7E;
-    b.iter(|| decode_slice(*bytes, SpecialChars::default()));
-    /*
-    let mut bytes = [0u8; 1_000_000];
-    bytes[0] = 0x7E;
-    bytes[999_999] = 0x7E;
-    b.iter(|| decode_slice(&mut bytes, SpecialChars::default()));
-    */
-}
+//#[bench]
+//fn bench_decode_slice_megabyte<'a>(b: &mut Bencher) {
+//    let mut bytes: Box<&'a mut [u8; 1_000_000]> = Box::new(&mut [0u8; 1_000_000]);
+//    bytes[0] = 0x7E;
+//    bytes[999_999] = 0x7E;
+//    b.iter(|| decode_slice(*bytes, SpecialChars::default()));
+//    /*
+//    let mut bytes: Box<&mut [u8; 1_000_000]> = Box::new(&mut [0u8; 1_000_000]);
+//    bytes[0] = 0x7E;
+//    bytes[999_999] = 0x7E;
+//    b.iter(|| return decode_slice(*bytes, SpecialChars::default()));
+//    */
+//    /*
+//    let mut bytes = [0u8; 1_000_000];
+//    bytes[0] = 0x7E;
+//    bytes[999_999] = 0x7E;
+//    b.iter(|| decode_slice(&mut bytes, SpecialChars::default()));
+//    */
+//}
 
 #[bench]
 fn bench_encode_special_chars_megabyte(b: &mut Bencher) {
