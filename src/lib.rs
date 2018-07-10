@@ -323,7 +323,7 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
     output.extend_from_slice(input);
 
     for (index, byte) in output.iter().enumerate() {
-        //        println!("D={}, B={} S={}  Output{:?}", index, byte, swap, input);
+        //println!("D={}, B={} S={}  Output{:?}", index, byte, swap, input);
         // Handle the special escape characters
         if last_was_fesc > 0 {
             if *byte == s_chars.tfesc {
@@ -345,7 +345,7 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
                     if (index + 1) < input_length {
                         return Err(HDLCError::FendCharInData);
                     }
-                    // Minus 2 for both FEND
+                    // Minus 1 because indexing starts at 0
                     let end = index - swap - 1;
                     return Ok(&input[..end]);
 
@@ -357,6 +357,7 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
                 last_was_fesc = 1;
             } else {
                 if sync > 0 {
+                    // Minus 1 because indexing starts at 0
                     input[index - swap - 1] = *byte;
                 }
             }
