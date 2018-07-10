@@ -49,7 +49,7 @@
 //! assert!(result.is_ok());
 //! assert_eq!(result.unwrap(), cmp);
 //! ```
-//! 
+//!
 //! ### Decode slice packet
 //! ```rust
 //! extern crate hdlc;
@@ -317,13 +317,13 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
     let mut swap = 0;
     let mut last_was_fesc = 0;
     let input_length = input.len();
-    
-// Predefine the vector for iterator
+
+    // Predefine the vector for iterator
     let mut output: Vec<u8> = Vec::with_capacity(input_length);
     output.extend_from_slice(input);
 
     for (index, byte) in output.iter().enumerate() {
-//        println!("D={}, B={} S={}  Output{:?}", index, byte, swap, input);
+        //        println!("D={}, B={} S={}  Output{:?}", index, byte, swap, input);
         // Handle the special escape characters
         if last_was_fesc > 0 {
             if *byte == s_chars.tfesc {
@@ -333,7 +333,7 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
                 swap = swap + 1;
                 input[index - swap - 1] = s_chars.fend;
             } else {
-                return Err(HDLCError::MissingTradeChar);    
+                return Err(HDLCError::MissingTradeChar);
             }
             last_was_fesc = 0
         } else {

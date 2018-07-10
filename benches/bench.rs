@@ -24,7 +24,7 @@ fn bench_decode_slice_megabyte<'a>(b: &'a mut Bencher) {
     let mut bytes: Box<&'a mut [u8; 1_000_000]> = Box::new(&mut [0u8; 1_000_000]);
     bytes[0] = 0x7E;
     bytes[999_999] = 0x7E;
-    b.iter(|| decode_slice( *bytes, SpecialChars::default()));
+    b.iter(|| decode_slice(*bytes, SpecialChars::default()));
     /*
     let mut bytes = [0u8; 1_000_000];
     bytes[0] = 0x7E;
