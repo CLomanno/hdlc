@@ -1,4 +1,9 @@
-# hdlc [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
+# hdlc 
+
+[![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
+[![Downloads](https://img.shields.io/crates/d/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
+[![Version](https://img.shields.io/crates/v/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
+[![License](https://img.shields.io/crates/l/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 
 ## hdlc
 
