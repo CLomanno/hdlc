@@ -194,7 +194,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.unwrap_err().description(),
-            HDLCError::MissingFinalFend.description()
+            HDLCError::MissingFend.description()
         )
     }
 
@@ -336,7 +336,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.unwrap_err().description(),
-            HDLCError::MissingFinalFend.description()
+            HDLCError::MissingFend.description()
         )
     }
 }
