@@ -230,37 +230,38 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
     let mut has_final_fend = false;
 
     // Verify input begins with a FEND
-    if input_iter.next() != Some(&s_chars.fend) { return Err(HDLCError::MissingFend); }
+    if input_iter.next() != Some(&s_chars.fend) {
+        return Err(HDLCError::MissingFend);
+    }
 
     // Loop over every byte of the message
     while let Some(value) = input_iter.next() {
         match value {
             // Handle a FESC
-            &val if val == s_chars.fesc => {
-                match input_iter.next() {
-                    Some(&val) if val == s_chars.tfend => output.push(s_chars.fend),
-                    Some(&val) if val == s_chars.tfesc  => output.push(s_chars.fesc),
-                    _ => return Err(HDLCError::MissingTradeChar)
-                }
-            }
+            &val if val == s_chars.fesc => match input_iter.next() {
+                Some(&val) if val == s_chars.tfend => output.push(s_chars.fend),
+                Some(&val) if val == s_chars.tfesc => output.push(s_chars.fesc),
+                _ => return Err(HDLCError::MissingTradeChar),
+            },
             // Handle a FEND
             &val if val == s_chars.fend => {
                 if input_iter.peek() == None {
                     has_final_fend = true;
-                }
-                else {
+                } else {
                     return Err(HDLCError::FendCharInData);
                 }
             }
             // Handle any other bytes
-            _ => {
-                output.push(*value)
-            }
+            _ => output.push(*value),
         }
     }
 
     // If the message had a final FEND, return the message
-    if has_final_fend { Ok(output) } else { Err(HDLCError::MissingFend) }
+    if has_final_fend {
+        Ok(output)
+    } else {
+        Err(HDLCError::MissingFend)
+    }
 }
 
 /// Produces slice (`&[u8]`) unescaped (decoded) message without `FEND` characters.

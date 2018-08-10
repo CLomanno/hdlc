@@ -3,8 +3,8 @@ extern crate hdlc;
 extern crate test;
 
 use hdlc::{decode, decode_slice, encode, SpecialChars};
-use test::Bencher;
 use std::ops::{Deref, DerefMut};
+use test::Bencher;
 
 /// Defines custom box with explicit lifetime
 struct MyBox<'a, T: 'a>(&'a mut T);
@@ -18,16 +18,24 @@ impl<'a, T: 'a> Deref for MyBox<'a, T> {
     }
 }
 
+/*
 impl<'a, T: 'a> DerefMut for MyBox<'a, T> {
 
     /// Derefrences `&mut MyBox`
-    fn deref_mut<'b>(&'b mut self) -> &'b mut T {
+    fn deref_mut<'a, 'b>(&'b mut self) -> &'a mut T {
         &mut self.0
     }
 }
+*/
 
+impl<'a, T: 'a> DerefMut for MyBox<'a, T> {
+    /// Derefrences `&mut MyBox`
+    fn deref_mut(&mut self) -> &mut T {
+        &mut self.0
+    }
+}
 impl<'a, T: 'a> MyBox<'a, T> {
-    fn new( x: &'a mut T) -> MyBox<'a, T> {
+    fn new(x: &'a mut T) -> MyBox<'a, T> {
         MyBox(x)
     }
 }
@@ -45,6 +53,10 @@ fn bench_decode_megabyte(b: &mut Bencher) {
     b.iter(|| decode(&*bytes, SpecialChars::default()));
 }
 
+// trait Red { }
+// impl<'a, T: 'a> Red for MyBox<'a, T> { }
+
+/*
 #[bench]
 fn bench_decode_slice_megabyte<'a>(b: &'a mut Bencher) {
 //fn bench_decode_slice_megabyte(b: &mut Bencher) {
@@ -54,10 +66,10 @@ fn bench_decode_slice_megabyte<'a>(b: &'a mut Bencher) {
     // bytes[999_999] = 0x7E;
     // b.iter(|| decode_slice(&*bytes, SpecialChars::default()));
     
-    let mut bytes = MyBox::new(&mut [0u8; 1_000_000]);
+    let mut bytes: MyBox<&'a [u8; 1_000_000]> = MyBox::new(&'a [0u8; 1_000_000]);
     bytes[0] = 0x7E;
     bytes[999_999] = 0x7E;
-    b.iter(|| decode_slice(&mut *(bytes.deref_mut()), SpecialChars::default()));
+    b.iter(|| decode_slice(&mut *bytes, SpecialChars::default()));
     
     
     // let mut bytes: <'a> = Box::new(&mut [0u8; 1_000_000]);
@@ -78,7 +90,7 @@ fn bench_decode_slice_megabyte<'a>(b: &'a mut Bencher) {
 //    b.iter(|| decode_slice(&mut bytes, SpecialChars::default()));
 //    */
 }
-
+*/
 #[bench]
 fn bench_encode_special_chars_megabyte(b: &mut Bencher) {
     let bytes = Box::new(vec![0x7E as u8; 1_000_000]);

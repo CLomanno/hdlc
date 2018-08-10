@@ -118,13 +118,13 @@ assert_eq!(result.unwrap(), cmp);
 
 ```rust
 cargo bench
-     Running target\release\deps\bench-8475e9ff4a76b8c6.exe
+     Running target\release\deps\bench-f7077ac294c24273.exe
 
 running 4 tests
-test bench_decode_megabyte                  ... bench:   2,068,254 ns/iter (+/- 159,469)
-test bench_decode_special_chars_2_megabytes ... bench:   5,586,588 ns/iter (+/- 119,725)
-test bench_encode_megabyte                  ... bench:   2,415,257 ns/iter (+/- 219,049)
-test bench_encode_special_chars_megabyte    ... bench:   5,715,299 ns/iter (+/- 400,649)
+test bench_decode_megabyte                  ... bench:   2,236,451 ns/iter (+/- 179,942)
+test bench_decode_special_chars_2_megabytes ... bench:   2,768,507 ns/iter (+/- 642,225)
+test bench_encode_megabyte                  ... bench:   2,572,386 ns/iter (+/- 582,359)
+test bench_encode_special_chars_megabyte    ... bench:   6,010,429 ns/iter (+/- 1,087,538)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 ```
