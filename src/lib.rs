@@ -1,6 +1,6 @@
 //! # hdlc
-//! Rust implementation of a High-level Data Link Control (HDLC) library with support of the
-//! IEEE standard.
+//! Only frames the data.  Rust implementation of a High-level Data Link Control (HDLC) 
+//! library with support of the IEEE standard.
 //!
 //! ## Usage
 //!
@@ -158,13 +158,13 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
     // Prealocate for speed.  *2 is the max size it can be if EVERY char is swapped
     let mut output = Vec::with_capacity(data.len() * 2);
     // Iterator over the input that allows peeking
-    let mut output_iter = data.into_iter().peekable();
+    let mut input_iter = data.into_iter();
 
     //Push initial FEND
     output.push(s_chars.fend);
 
     // Loop over every byte of the message
-    while let Some(value) = output_iter.next() {
+    while let Some(value) = input_iter.next() {
         match value {
             // FEND and FESC
             &val if val == s_chars.fesc => {
