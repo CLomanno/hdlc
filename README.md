@@ -1,13 +1,13 @@
-# hdlc 
+# hdlc
 
 [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
 [![Downloads](https://img.shields.io/crates/d/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 [![Version](https://img.shields.io/crates/v/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 [![License](https://img.shields.io/crates/l/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 
-## hdlc
+## HDLC Framing Description
 
-> Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
+> Only frames the data.  Rust implementation of a High-level Data Link Control (HDLC) library with support of the IEEE standard.
 
 * [Crate](https://crates.io/crates/hdlc)
 * [Documentation](https://docs.rs/hdlc/)
@@ -20,7 +20,7 @@ Add `hdlc` to `Cargo.toml`
 
 ```toml
 [dependencies]
-hdlc = "^0.2.2"
+hdlc = "^0.2.3"
 ```
 
 or
@@ -118,13 +118,13 @@ assert_eq!(result.unwrap(), cmp);
 
 ```rust
 cargo bench
-     Running target\release\deps\bench-f7077ac294c24273.exe
+     Running target\release\deps\bench-aa4aa4788480234e.exe
 
 running 4 tests
-test bench_decode_megabyte                  ... bench:   2,236,451 ns/iter (+/- 179,942)
-test bench_decode_special_chars_2_megabytes ... bench:   2,768,507 ns/iter (+/- 642,225)
-test bench_encode_megabyte                  ... bench:   2,572,386 ns/iter (+/- 582,359)
-test bench_encode_special_chars_megabyte    ... bench:   6,010,429 ns/iter (+/- 1,087,538)
+test bench_decode_megabyte                  ... bench:   2,050,442 ns/iter (+/- 81,462)
+test bench_decode_special_chars_2_megabytes ... bench:   2,617,975 ns/iter (+/- 207,296)
+test bench_encode_megabyte                  ... bench:   2,406,658 ns/iter (+/- 231,638)
+test bench_encode_special_chars_megabyte    ... bench:   5,445,694 ns/iter (+/- 294,424)
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 ```

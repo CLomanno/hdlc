@@ -155,22 +155,28 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
         return Err(HDLCError::DuplicateSpecialChar);
     }
 
-    // Prealocate for speed
-    let mut output = Vec::with_capacity(data.len() * 2); // *2 is the max size it can be if EVERY char is swapped
+    // Prealocate for speed.  *2 is the max size it can be if EVERY char is swapped
+    let mut output = Vec::with_capacity(data.len() * 2);
+    // Iterator over the input that allows peeking
+    let mut output_iter = data.into_iter().peekable();
 
     //Push initial FEND
     output.push(s_chars.fend);
 
-    // As of 7/2/18 Stuct fields are not patterns and cannot be match arms.
-    for i in data {
-        if *i == s_chars.fend {
-            output.push(s_chars.fesc);
-            output.push(s_chars.tfend);
-        } else if *i == s_chars.fesc {
-            output.push(s_chars.fesc);
-            output.push(s_chars.tfesc);
-        } else {
-            output.push(*i);
+    // Loop over every byte of the message
+    while let Some(value) = output_iter.next() {
+        match value {
+            // FEND and FESC
+            &val if val == s_chars.fesc => {
+                output.push(s_chars.fesc);
+                output.push(s_chars.tfesc);
+            }
+            &val if val == s_chars.fend => {
+                output.push(s_chars.fesc);
+                output.push(s_chars.tfend);
+            }
+            // Handle any other bytes
+            _ => output.push(*value),
         }
     }
 
