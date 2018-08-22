@@ -42,18 +42,13 @@ mod tests {
 
     #[test]
     fn pack_rejects_dupe_s_chars() {
-        use std::error::Error;
-
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
         let result = encode(&msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::DuplicateSpecialChar.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
     }
 
     #[test]
@@ -122,24 +117,17 @@ mod tests {
 
     #[test]
     fn depack_rejects_dupe_s_chars() {
-        use std::error::Error;
-
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let msg: Vec<u8> = vec![0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
         let result = decode(&msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::DuplicateSpecialChar.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
     }
 
     #[test]
     fn depack_rejects_stray_fend_char() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let msg: Vec<u8> = vec![
             chars.fend, 0x01, 0x00, 0x69, 0x00, 0x05, 0x80, 0x09, chars.fend, chars.fend,
@@ -148,16 +136,11 @@ mod tests {
         let result = decode(&msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::FendCharInData.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::FendCharInData)
     }
 
     #[test]
     fn depack_rejects_stray_fesc_char() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let msg: Vec<u8> = vec![
             chars.fend, 0x01, chars.fesc, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09, chars.fend,
@@ -166,16 +149,11 @@ mod tests {
         let result = decode(&msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::MissingTradeChar.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::MissingTradeChar)
     }
 
     #[test]
     fn depack_rejects_incomplete_message() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let msg: Vec<u8> = vec![
             chars.fend,
@@ -192,10 +170,7 @@ mod tests {
         let result = decode(&msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::MissingFend.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::MissingFinalFend)
     }
 
     #[test]
@@ -264,24 +239,17 @@ mod tests {
 
     #[test]
     fn depack_slice_rejects_dupe_s_chars() {
-        use std::error::Error;
-
         let chars = SpecialChars::new(0x7E, 0x7D, 0x5D, 0x5D);
         let mut msg = [0x01, chars.fend, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09];
 
         let result = decode_slice(&mut msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::DuplicateSpecialChar.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::DuplicateSpecialChar)
     }
 
     #[test]
     fn depack_slice_rejects_stray_fend_char() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let mut msg = [
             chars.fend, 0x01, 0x00, 0x69, 0x00, 0x05, 0x80, 0x09, chars.fend, chars.fend,
@@ -290,16 +258,11 @@ mod tests {
         let result = decode_slice(&mut msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::FendCharInData.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::FendCharInData)
     }
 
     #[test]
     fn depack_slice_rejects_stray_fesc_char() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let mut msg = [
             chars.fend, 0x01, chars.fesc, 0x00, chars.fesc, 0x00, 0x05, 0x80, 0x09, chars.fend,
@@ -308,16 +271,11 @@ mod tests {
         let result = decode_slice(&mut msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::MissingTradeChar.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::MissingTradeChar)
     }
 
     #[test]
     fn depack_slice_rejects_incomplete_message() {
-        use std::error::Error;
-
         let chars = SpecialChars::default();
         let mut msg = [
             chars.fend,
@@ -334,9 +292,6 @@ mod tests {
         let result = decode_slice(&mut msg, chars);
 
         assert!(result.is_err());
-        assert_eq!(
-            result.unwrap_err().description(),
-            HDLCError::MissingFend.description()
-        )
+        assert_eq!(result.unwrap_err(), HDLCError::MissingFinalFend)
     }
 }

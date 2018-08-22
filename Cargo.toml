@@ -8,3 +8,6 @@ readme = "README.md"
 repository = "https://github.com/CLomanno/hdlc"
 documentation = "https://docs.rs/hdlc"
 license = "MIT OR Apache-2.0"
+
+[dependencies]
+failure = "0.1.2"
