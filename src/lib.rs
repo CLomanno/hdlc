@@ -1,5 +1,5 @@
 //! # hdlc
-//! Only frames the data.  Rust implementation of a High-level Data Link Control (HDLC) 
+//! Only frames the data.  Rust implementation of a High-level Data Link Control (HDLC)
 //! library with support of the IEEE standard.
 //!
 //! ## Usage
@@ -69,10 +69,11 @@
 
 #![deny(missing_docs)]
 
+#[macro_use]
+extern crate failure;
+
 use std::collections::HashSet;
 use std::default::Default;
-use std::error::Error;
-use std::fmt;
 
 /// Special Character structure for holding the encode and decode values.
 /// IEEE standard values are defined below in Default.
@@ -204,6 +205,7 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
 /// length.  Found the `SpecialChars::fend` inside the message.
 /// * **HDLCError::MissingTradeChar**: Checks to make sure every frame escape character `fesc`
 /// is followed by either a `tfend` or a `tfesc`.
+/// * **HDLCError::MissingFirstFend**: Input vector is missing a first `SpecialChars::fend`
 /// * **HDLCError::MissingFinalFend**: Input vector is missing a final `SpecialChars::fend`
 ///
 /// # Todo
@@ -237,7 +239,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
 
     // Verify input begins with a FEND
     if input_iter.next() != Some(&s_chars.fend) {
-        return Err(HDLCError::MissingFend);
+        return Err(HDLCError::MissingFirstFend);
     }
 
     // Loop over every byte of the message
@@ -266,7 +268,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
     if has_final_fend {
         Ok(output)
     } else {
-        Err(HDLCError::MissingFend)
+        Err(HDLCError::MissingFinalFend)
     }
 }
 
@@ -364,42 +366,25 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
         }
     }
 
-    return Err(HDLCError::MissingFend);
+    return Err(HDLCError::MissingFinalFend);
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Fail, PartialEq)]
 /// Common error for HDLC actions.
 pub enum HDLCError {
     /// Catches duplicate special characters.
+    #[fail(display = "Caught a duplicate special character.")]
     DuplicateSpecialChar,
     /// Catches a random sync char in the data.
+    #[fail(display = "Caught a random sync char in the data.")]
     FendCharInData,
     /// Catches a random swap char, `fesc`, in the data with no `tfend` or `tfesc`.
+    #[fail(display = "Caught a random swap char in the data.")]
     MissingTradeChar,
-    /// No beginning or final fend on the message.
-    MissingFend,
-}
-
-impl fmt::Display for HDLCError {
-    /// Formats the output for the error using the given formatter.
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            HDLCError::DuplicateSpecialChar => write!(f, "Caught a duplicate special character."),
-            HDLCError::FendCharInData => write!(f, "Caught a random sync char in the data."),
-            HDLCError::MissingTradeChar => write!(f, "Caught a random swap char in the data."),
-            HDLCError::MissingFend => write!(f, "Missing beginning or final FEND character."),
-        }
-    }
-}
-
-impl Error for HDLCError {
-    /// Returns a short description of the error.
-    fn description(&self) -> &str {
-        match *self {
-            HDLCError::DuplicateSpecialChar => "Caught a duplicate special character.",
-            HDLCError::FendCharInData => "Caught a random sync char in the data.",
-            HDLCError::MissingTradeChar => "Caught a random swap char in the data.",
-            HDLCError::MissingFend => "Missing beginning or final FEND character.",
-        }
-    }
+    /// No first fend on the message.
+    #[fail(display = "Missing first FEND character.")]
+    MissingFirstFend,
+    /// No final fend on the message.
+    #[fail(display = "Missing final FEND character.")]
+    MissingFinalFend,
 }
