@@ -84,7 +84,7 @@ use std::default::Default;
 /// * **FESC**  = 0x7D;
 /// * **TFEND** = 0x5E;
 /// * **TFESC** = 0x5D;
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct SpecialChars {
     /// Frame END. Byte that marks the beginning and end of a packet
     pub fend: u8,
@@ -159,20 +159,20 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
     // Prealocate for speed.  *2 is the max size it can be if EVERY char is swapped
     let mut output = Vec::with_capacity(data.len() * 2);
     // Iterator over the input that allows peeking
-    let mut input_iter = data.into_iter();
+    let input_iter = data.iter();
 
     //Push initial FEND
     output.push(s_chars.fend);
 
     // Loop over every byte of the message
-    while let Some(value) = input_iter.next() {
-        match value {
+    for value in input_iter {
+        match *value {
             // FEND and FESC
-            &val if val == s_chars.fesc => {
+            val if val == s_chars.fesc => {
                 output.push(s_chars.fesc);
                 output.push(s_chars.tfesc);
             }
-            &val if val == s_chars.fend => {
+            val if val == s_chars.fend => {
                 output.push(s_chars.fesc);
                 output.push(s_chars.tfend);
             }
@@ -219,7 +219,7 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
 /// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode(&input.to_vec(), chars);
 /// ```
-pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
+pub fn decode(input: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
@@ -233,7 +233,7 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
     // Predefine the vector for speed
     let mut output: Vec<u8> = Vec::with_capacity(input.len());
     // Iterator over the input that allows peeking
-    let mut input_iter = input.into_iter().peekable();
+    let mut input_iter = input.iter().peekable();
     // Tracks whether input contains a final FEND
     let mut has_final_fend = false;
 
@@ -244,15 +244,15 @@ pub fn decode(input: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErr
 
     // Loop over every byte of the message
     while let Some(value) = input_iter.next() {
-        match value {
+        match *value {
             // Handle a FESC
-            &val if val == s_chars.fesc => match input_iter.next() {
+            val if val == s_chars.fesc => match input_iter.next() {
                 Some(&val) if val == s_chars.tfend => output.push(s_chars.fend),
                 Some(&val) if val == s_chars.tfesc => output.push(s_chars.fesc),
                 _ => return Err(HDLCError::MissingTradeChar),
             },
             // Handle a FEND
-            &val if val == s_chars.fend => {
+            val if val == s_chars.fend => {
                 if input_iter.peek() == None {
                     has_final_fend = true;
                 } else {
@@ -329,10 +329,10 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
         // Handle the special escape characters
         if last_was_fesc > 0 {
             if *byte == s_chars.tfesc {
-                swap = swap + 1;
+                swap += 1;
                 input[index - swap - 1] = s_chars.fesc;
             } else if *byte == s_chars.tfend {
-                swap = swap + 1;
+                swap += 1;
                 input[index - swap - 1] = s_chars.fend;
             } else {
                 return Err(HDLCError::MissingTradeChar);
@@ -357,16 +357,14 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
                 }
             } else if *byte == s_chars.fesc {
                 last_was_fesc = 1;
-            } else {
-                if sync > 0 {
-                    // Minus 1 because indexing starts at 0
-                    input[index - swap - 1] = *byte;
-                }
+            } else if sync > 0 {
+                // Minus 1 because indexing starts at 0
+                input[index - swap - 1] = *byte;
             }
         }
     }
 
-    return Err(HDLCError::MissingFinalFend);
+    Err(HDLCError::MissingFinalFend)
 }
 
 #[derive(Debug, Fail, PartialEq)]

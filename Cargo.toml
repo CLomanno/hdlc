@@ -1,6 +1,6 @@
 [package]
 name = "hdlc"
-version = "0.2.3"
+version = "0.2.5"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
 keywords = ["hdlc", "frame", "framing", "byte-swap", "packetize"]
@@ -10,4 +10,9 @@ documentation = "https://docs.rs/hdlc"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-failure = "0.1.2"
+failure = "0.1.5"
+criterion = "0.2.10"
+
+[[bench]]
+name = "bench"
+harness = false

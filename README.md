@@ -20,7 +20,7 @@ Add `hdlc` to `Cargo.toml`
 
 ```toml
 [dependencies]
-hdlc = "^0.2.3"
+hdlc = "^0.2.5"
 ```
 
 or
@@ -114,17 +114,18 @@ assert_eq!(result.unwrap(), cmp);
 
 > Bencher is currently not available in Rust stable releases.
 
-`cargo bench` with 2.2 GHz Intel Core i7 results ~430MB/s throughput.
+`cargo bench` with 2.4 GHz Intel Xeon E5 results ~430MB/s throughput.
 
 ```rust
 cargo bench
-     Running target\release\deps\bench-aa4aa4788480234e.exe
+     Running target/release/deps/bench-bb5601191c448c8f
 
-running 4 tests
-test bench_decode_megabyte                  ... bench:   2,050,442 ns/iter (+/- 81,462)
-test bench_decode_special_chars_2_megabytes ... bench:   2,617,975 ns/iter (+/- 207,296)
-test bench_encode_megabyte                  ... bench:   2,406,658 ns/iter (+/- 231,638)
-test bench_encode_special_chars_megabyte    ... bench:   5,445,694 ns/iter (+/- 294,424)
+bench_encode_megabyte   time:   [2.2503 ms 2.2656 ms 2.2818 ms]
+bench_decode_megabyte   time:   [1.7752 ms 1.7939 ms 1.8161 ms]
+bench_encode_special_chars_megabyte
+                        time:   [4.3846 ms 4.4090 ms 4.4348 ms]
+bench_decode_special_chars_2_megabytes
+                        time:   [1.7868 ms 1.7980 ms 1.8108 ms]
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 ```
