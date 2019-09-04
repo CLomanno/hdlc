@@ -101,7 +101,6 @@ criterion_main!(benches);
 //     b.iter(|| decode_slice(*bytes, SpecialChars::default()) )
 // }
 
-
 // #[bench]
 // fn bench_encode_special_chars_megabyte(b: &mut Bencher) {
 //     let bytes = Box::new(vec![0x7E as u8; 1_000_000]);
