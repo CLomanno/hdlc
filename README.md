@@ -1,6 +1,7 @@
 # hdlc
 
 [![Build Status](https://travis-ci.org/CLomanno/hdlc.svg?branch=master)](https://travis-ci.org/CLomanno/hdlc)
+[![Coverage Status](https://coveralls.io/repos/github/CLomanno/hdlc/badge.svg?branch=master)](https://coveralls.io/github/CLomanno/hdlc?branch=master)
 [![Downloads](https://img.shields.io/crates/d/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 [![Version](https://img.shields.io/crates/v/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
 [![License](https://img.shields.io/crates/l/hdlc.svg?style=flat-square)](https://crates.io/crates/hdlc/)
@@ -20,7 +21,7 @@ Add `hdlc` to `Cargo.toml`
 
 ```toml
 [dependencies]
-hdlc = "^0.2.6"
+hdlc = "^0.2.7"
 ```
 
 or
