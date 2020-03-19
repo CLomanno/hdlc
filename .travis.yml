@@ -25,18 +25,10 @@ matrix:
             - kalakris-cmake
 
     - env: TARGET=x86_64-unknown-linux-gnu
-      rust: nightly
-
-    - env: TARGET=x86_64-unknown-linux-musl
-      rust: nightly
-
-    # Raspberry Pi 1
-    - env: TARGET=arm-unknown-linux-gnueabi DISABLE_EXAMPLES=1 DISABLE_TESTS=1
-      rust: nightly
-
-    # Raspberry Pi 2, 3, etc
-    - env: TARGET=armv7-unknown-linux-gnueabihf DISABLE_EXAMPLES=1 DISABLE_TESTS=1
-      rust: nightly
+      rust: 
+        - stable
+        - beta
+        - nightly
 
 install:
   bash ci/install.sh
@@ -51,6 +43,7 @@ cache:
   directories:
     - /home/travis/.cargo
 
+# But don't cache the cargo registry
 before_cache:
   bash ci/before_cache.sh
 
