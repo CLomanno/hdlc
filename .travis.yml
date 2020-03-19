@@ -12,6 +12,7 @@ before_cache:
   - rm -rf C:/Users/user/.cargo/registry
 
 env: # required for allow_failures
+# replaced linux and osx with windiws
 os:
   - windows
 rust:
