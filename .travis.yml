@@ -7,7 +7,20 @@ before_install:
   - bash ci/before_install.sh
 
 matrix:
+  fast_finish: true
+  allow_failures:
+      - rust: nightly
   include:
+      - rust: stable
+      env: NAME='linting'
+      before_script:
+        - export PATH=$HOME/.cargo/bin:$PATH
+        - rustup component add rustfmt-preview
+        - rustup component add clippy-preview
+      script:
+        - cargo fmt --all -- --check
+        - cargo clippy
+
     - env: TARGET=x86_64-unknown-linux-gnu
       before_script:
         - bash ci/coverage_before_script.sh
