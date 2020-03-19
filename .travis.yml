@@ -1,51 +1,19 @@
 language: rust
+# sudo is required to enable kcov to use the personality syscall
+sudo: required
 
-# Recommeneded caching strategy from https://levans.fr/rust_travis_cache.html
-# Need to cache the whole `.cargo` directory to keep .crates.toml for
-# cargo-update to work
-cache:
-  directories:
-    - C:/Users/user/.cargo
-
-# But don't cache the cargo registry
-before_cache:
-  - rm -rf C:/Users/user/.cargo/registry
-
-env: # required for allow_failures
-# replaced linux and osx with windiws
-os:
-  - windows
-rust:
-  - stable
-  - beta
-  - nightly
+before_install:
+  - git clone https://github.com/eldruin/rust-driver-ci-scripts ci
+  - bash ci/before_install.sh
 
 matrix:
-  fast_finish: true
-  allow_failures:
-      - rust: nightly
   include:
-    - rust: stable
-      env: NAME='linting'
+    - env: TARGET=x86_64-unknown-linux-gnu
       before_script:
-        - rustup component add rustfmt-preview
-        - rustup component add clippy-preview
-      script:
-        - cargo fmt --all -- --check
-        - cargo clippy
-
-    - env: NAME='cargo-travis'
-      sudo: required # travis-ci/travis-ci#9061
-      before_script:
-        - cargo install cargo-update || echo "cargo-update already installed"
-        - cargo install cargo-travis || echo "cargo-travis already installed"
-        - cargo install-update -a
-      script:
-        - |
-          cargo build --verbose &&
-          cargo coverage --verbose &&
-          bash <(curl -s https://codecov.io/bash) -s target/kcov
-      addons: # required for kcov
+        - bash ci/coverage_before_script.sh
+      after_success:
+        - bash ci/coverage_after_success.sh
+      addons:
         apt:
           packages:
             - libcurl4-openssl-dev
@@ -53,9 +21,39 @@ matrix:
             - libdw-dev
             - binutils-dev
             - cmake
+          sources:
+            - kalakris-cmake
 
-script: |
-  export RUST_BACKTRACE=1 &&
-  cargo build --verbose &&
-  cargo test --verbose &&
-  cargo doc --no-deps --verbose
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: nightly
+
+    - env: TARGET=x86_64-unknown-linux-musl
+      rust: nightly
+
+    # Raspberry Pi 1
+    - env: TARGET=arm-unknown-linux-gnueabi DISABLE_EXAMPLES=1 DISABLE_TESTS=1
+      rust: nightly
+
+    # Raspberry Pi 2, 3, etc
+    - env: TARGET=armv7-unknown-linux-gnueabihf DISABLE_EXAMPLES=1 DISABLE_TESTS=1
+      rust: nightly
+
+install:
+  bash ci/install.sh
+
+script:
+  bash ci/script.sh
+
+after_script: set +e
+
+cache: cargo
+cache:
+  directories:
+    - /home/travis/.cargo
+
+before_cache:
+  bash ci/before_cache.sh
+
+notifications:
+  email:
+    on_success: never
