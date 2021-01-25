@@ -145,7 +145,7 @@ impl SpecialChars {
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 /// let op_vec = hdlc::encode(&input.to_vec(), chars);
 /// ```
-pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
+pub fn encode(data: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
