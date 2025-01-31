@@ -11,7 +11,7 @@ documentation = "https://docs.rs/hdlc"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-failure = "0.1.7"
+thiserror = "2.0.11"
 
 [dev-dependencies]
 criterion = "0.5.1"
