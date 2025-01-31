@@ -1,8 +1,4 @@
-extern crate hdlc;
-#[macro_use]
-extern crate criterion;
-
-use criterion::Criterion;
+use criterion::{criterion_group, criterion_main, Criterion};
 use hdlc::{decode, encode, SpecialChars};
 
 fn bench_encode_megabyte(c: &mut Criterion) {
@@ -70,8 +66,6 @@ criterion_group!(
 criterion_main!(benches);
 
 // #![feature(test)]
-// extern crate hdlc;
-// extern crate test;
 
 // use hdlc::{decode, decode_slice, encode, SpecialChars};
 // use test::Bencher;

@@ -1,5 +1,3 @@
-extern crate hdlc;
-
 #[cfg(test)]
 mod tests {
     use hdlc::{decode, decode_slice, encode, HDLCError, SpecialChars};

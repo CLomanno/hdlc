@@ -31,16 +31,9 @@ or
 git = "https://github.com/CLomanno/hdlc"
 ```
 
-Add this to crate root
-
-```rust
-extern crate hdlc;
-```
-
 ### Encode packet
 
 ```rust
-extern crate hdlc;
 use hdlc::{SpecialChars, encode};
 
 // Set up your vector of bytes and generate your Special Characters
@@ -57,7 +50,6 @@ assert_eq!(result.unwrap(), cmp);
 ### Custom Special Characters
 
 ```rust
-extern crate hdlc;
 use hdlc::{SpecialChars, encode};
 
 // Set up your vector of bytes and generate your Special Characters
@@ -75,7 +67,6 @@ assert_eq!(result.unwrap(), cmp)
 ### Decode packet
 
 ```rust
-extern crate hdlc;
 use hdlc::{SpecialChars, decode};
 
 // Set up your vector of bytes and generate your Special Characters
@@ -94,7 +85,6 @@ assert_eq!(result.unwrap(), cmp);
 ### Decode slice packet
 
 ```rust
-extern crate hdlc;
 use hdlc::{SpecialChars, decode_slice};
 
 // Set up your mutable slice of bytes and generate your Special Characters

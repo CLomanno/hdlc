@@ -6,7 +6,6 @@
 //!
 //! ### Encode packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
@@ -20,7 +19,6 @@
 //!
 //! ### Custom Special Characters
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x50, 0x00, 0x05, 0x80, 0x09];
@@ -35,7 +33,6 @@
 //!
 //! ### Decode packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, decode};
 //!
 //! let chars = SpecialChars::default();
@@ -52,7 +49,6 @@
 //!
 //! ### Decode slice packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, decode_slice};
 //!
 //! let chars = SpecialChars::default();
@@ -140,7 +136,6 @@ impl SpecialChars {
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 /// let op_vec = hdlc::encode(&input.to_vec(), chars);
@@ -214,7 +209,6 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode(&input.to_vec(), chars);
@@ -298,7 +292,6 @@ pub fn decode(input: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError>
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let mut input = [ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode_slice(&mut input, chars);
