@@ -1,5 +1,6 @@
 [package]
 name = "hdlc"
+edition = "2021"
 version = "0.2.7"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
