@@ -127,7 +127,7 @@ impl SpecialChars {
 /// # Error
 ///
 /// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
-/// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
+///     the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 ///
 /// # Todo
 ///
@@ -139,7 +139,7 @@ impl SpecialChars {
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 /// let op_vec = hdlc::encode(&input.to_vec(), chars);
 /// ```
-pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
+pub fn encode(data: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError> {
     // Safety check to make sure the special character values are all unique
     let mut set = HashSet::new();
     if !set.insert(s_chars.fend)
@@ -194,11 +194,11 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
 /// # Error
 ///
 /// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
-/// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
+///     the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 /// * **HDLCError::FendCharInData**: Checks to make sure the full decoded message is the full
-/// length.  Found the `SpecialChars::fend` inside the message.
+///     length.  Found the `SpecialChars::fend` inside the message.
 /// * **HDLCError::MissingTradeChar**: Checks to make sure every frame escape character `fesc`
-/// is followed by either a `tfend` or a `tfesc`.
+///     is followed by either a `tfend` or a `tfesc`.
 /// * **HDLCError::MissingFirstFend**: Input vector is missing a first `SpecialChars::fend`
 /// * **HDLCError::MissingFinalFend**: Input vector is missing a final `SpecialChars::fend`
 ///
@@ -246,7 +246,7 @@ pub fn decode(input: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError>
             },
             // Handle a FEND
             val if val == s_chars.fend => {
-                if input_iter.peek() == None {
+                if input_iter.peek().is_none() {
                     has_final_fend = true;
                 } else {
                     return Err(HDLCError::FendCharInData);
@@ -278,11 +278,11 @@ pub fn decode(input: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError>
 /// # Error
 ///
 /// * **HDLCError::DuplicateSpecialChar**: Checks special characters for duplicates, if any of
-/// the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
+///     the `SpecialChars` are duplicate, throw an error.  Displays "Duplicate special character".
 /// * **HDLCError::FendCharInData**: Checks to make sure the full decoded message is the full
-/// length.  Found the `SpecialChars::fend` inside the message.
+///     length.  Found the `SpecialChars::fend` inside the message.
 /// * **HDLCError::MissingTradeChar**: Checks to make sure every frame escape character `fesc`
-/// is followed by either a `tfend` or a `tfesc`.
+///     is followed by either a `tfend` or a `tfesc`.
 /// * **HDLCError::MissingFinalFend**: Input vector is missing a final `SpecialChars::fend`
 ///
 /// # Todo
