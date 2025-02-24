@@ -1,4 +1,6 @@
-target
+.devcontainer
 .idea
+.vscode
+target
+
 Cargo.lock
-.vscode/launch.json
