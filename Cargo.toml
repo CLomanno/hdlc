@@ -1,5 +1,6 @@
 [package]
 name = "hdlc"
+edition = "2021"
 version = "0.2.7"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
@@ -10,8 +11,10 @@ documentation = "https://docs.rs/hdlc"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-failure = "0.1.7"
-criterion = "0.3.1"
+thiserror = "2.0.11"
+
+[dev-dependencies]
+criterion = "0.5.1"
 
 [[bench]]
 name = "bench"

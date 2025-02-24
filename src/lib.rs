@@ -6,7 +6,6 @@
 //!
 //! ### Encode packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
@@ -20,7 +19,6 @@
 //!
 //! ### Custom Special Characters
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, encode};
 //!
 //! let msg: Vec<u8> = vec![0x01, 0x7E, 0x70, 0x50, 0x00, 0x05, 0x80, 0x09];
@@ -35,7 +33,6 @@
 //!
 //! ### Decode packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, decode};
 //!
 //! let chars = SpecialChars::default();
@@ -52,7 +49,6 @@
 //!
 //! ### Decode slice packet
 //! ```rust
-//! extern crate hdlc;
 //! use hdlc::{SpecialChars, decode_slice};
 //!
 //! let chars = SpecialChars::default();
@@ -69,8 +65,7 @@
 
 #![deny(missing_docs)]
 
-#[macro_use]
-extern crate failure;
+use thiserror::Error;
 
 use std::collections::HashSet;
 use std::default::Default;
@@ -140,7 +135,6 @@ impl SpecialChars {
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09];
 /// let op_vec = hdlc::encode(&input.to_vec(), chars);
@@ -214,7 +208,6 @@ pub fn encode(data: &Vec<u8>, s_chars: SpecialChars) -> Result<Vec<u8>, HDLCErro
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let input: Vec<u8> = vec![ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode(&input.to_vec(), chars);
@@ -298,7 +291,6 @@ pub fn decode(input: &[u8], s_chars: SpecialChars) -> Result<Vec<u8>, HDLCError>
 ///
 /// # Example
 /// ```rust
-/// extern crate hdlc;
 /// let chars = hdlc::SpecialChars::default();
 /// let mut input = [ 0x7E, 0x01, 0x50, 0x00, 0x00, 0x00, 0x05, 0x80, 0x09, 0x7E];
 /// let op_vec = hdlc::decode_slice(&mut input, chars);
@@ -367,22 +359,22 @@ pub fn decode_slice(input: &mut [u8], s_chars: SpecialChars) -> Result<&[u8], HD
     Err(HDLCError::MissingFinalFend)
 }
 
-#[derive(Debug, Fail, PartialEq)]
+#[derive(Debug, Error, PartialEq)]
 /// Common error for HDLC actions.
 pub enum HDLCError {
     /// Catches duplicate special characters.
-    #[fail(display = "Caught a duplicate special character.")]
+    #[error("Caught a duplicate special character.")]
     DuplicateSpecialChar,
     /// Catches a random sync char in the data.
-    #[fail(display = "Caught a random sync char in the data.")]
+    #[error("Caught a random sync char in the data.")]
     FendCharInData,
     /// Catches a random swap char, `fesc`, in the data with no `tfend` or `tfesc`.
-    #[fail(display = "Caught a random swap char in the data.")]
+    #[error("Caught a random swap char in the data.")]
     MissingTradeChar,
     /// No first fend on the message.
-    #[fail(display = "Missing first FEND character.")]
+    #[error("Missing first FEND character.")]
     MissingFirstFend,
     /// No final fend on the message.
-    #[fail(display = "Missing final FEND character.")]
+    #[error("Missing final FEND character.")]
     MissingFinalFend,
 }
