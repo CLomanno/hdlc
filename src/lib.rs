@@ -459,6 +459,9 @@ impl FrameReader<'_> {
                 if in_frame {
                     self.rest.clear();
                     full_frame = true;
+
+                    // Re-insert FEND so that we can handle sharing with following packet
+                    bytes_checked -= 1;
                     break;
                 } else {
                     // If the next byte is also a fend byte, skip it
