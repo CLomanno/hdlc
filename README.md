@@ -21,7 +21,7 @@ Add `hdlc` to `Cargo.toml`
 
 ```toml
 [dependencies]
-hdlc = "^0.4.0"
+hdlc = "^0.4.1"
 ```
 
 or
@@ -105,18 +105,18 @@ assert_eq!(result.unwrap(), cmp);
 
 > Bencher is currently not available in Rust stable releases.
 
-`cargo bench` with 2.4 GHz Intel Xeon E5 results ~430MB/s throughput.
+`cargo bench` with 5.3 GHz AMD Ryzen 5 7600X results ~820MB/s throughput.
 
 ```rust
 cargo bench
-     Running target/release/deps/bench-bb5601191c448c8f
+     Running target/release/deps/bench-ded986797763ea98
 
-bench_encode_megabyte   time:   [2.2503 ms 2.2656 ms 2.2818 ms]
-bench_decode_megabyte   time:   [1.7752 ms 1.7939 ms 1.8161 ms]
+bench_encode_megabyte   time:   [930.46 µs 932.18 µs 934.07 µs]
+bench_decode_megabyte   time:   [598.31 µs 615.22 µs 636.27 µs]
 bench_encode_special_chars_megabyte
-                        time:   [4.3846 ms 4.4090 ms 4.4348 ms]
+                        time:   [1.2010 ms 1.2225 ms 1.2463 ms]
 bench_decode_special_chars_2_megabytes
-                        time:   [1.7868 ms 1.7980 ms 1.8108 ms]
+                        time:   [662.38 µs 664.20 µs 666.28 µs]
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 4 measured; 0 filtered out
 ```
@@ -133,5 +133,4 @@ at your option.
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
-additional terms or conditions.
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.

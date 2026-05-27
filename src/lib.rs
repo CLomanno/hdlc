@@ -1,6 +1,7 @@
 //! # hdlc
 //! Frames the data or parses a frame.  Rust implementation of a High-level Data Link Control (HDLC)
-//! library with support of the IEEE standard.
+//! library with support of the IEEE standard. Can use a single FEND between packets as is standard
+//! and described at https://en.wikipedia.org/wiki/High-Level_Data_Link_Control#Structure
 //!
 //! ## Usage
 //!

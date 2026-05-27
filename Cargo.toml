@@ -1,7 +1,7 @@
 [package]
 name = "hdlc"
 edition = "2021"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Christopher Lomanno <Lomannoc@gmail.com>", "Oskar Østby <oskar@oestby.io>"]
 description = "Rust implementation of HDLC with support of the IEEE standard"
 keywords = ["hdlc", "frame", "framing", "byte-swap", "packetize"]
@@ -14,7 +14,7 @@ license = "MIT OR Apache-2.0"
 thiserror = "2.0.11"
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion = "0.8.2"
 
 [[bench]]
 name = "bench"
