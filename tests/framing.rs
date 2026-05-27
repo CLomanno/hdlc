@@ -413,8 +413,12 @@ mod tests {
     fn get_multiple_frames() {
         let chars = SpecialChars::default();
         let msg = [
-            chars.fend, 0x01, 0x00, 0x05, 0x80, chars.fend, chars.fend, 0x02, 0x00, 0x05, 0x80,
-            chars.fend, chars.fend, 0x03, 0x00, 0x05, 0x80, chars.fend,
+            chars.fend, 0x01, 0x00, 0x05, 0x80, chars.fend,
+            chars.fend, 0x02, 0x00, 0x05, 0x80, chars.fend,
+            // Start-frame delimeter inferred from previous packet:
+            0x03, 0x00, 0x05, 0x80, chars.fend,
+            0x11, 0x13, 0x17, 0x1d, 0x1f, chars.fend,
+            chars.fend, 0x07, 0x0b, chars.fend
         ];
         let mut frames: Vec<Vec<u8>> = vec![];
         let mut reader = Cursor::new(msg);
@@ -429,10 +433,12 @@ mod tests {
                 }
             }
         }
-        assert_eq!(frames.len(), 3);
+        assert_eq!(frames.len(), 5);
         assert_eq!(frames[0], vec![126, 1, 0, 5, 128, 126]);
         assert_eq!(frames[1], vec![126, 2, 0, 5, 128, 126]);
         assert_eq!(frames[2], vec![126, 3, 0, 5, 128, 126]);
+        assert_eq!(frames[3], vec![126, 17, 19, 23, 29, 31, 126]);
+        assert_eq!(frames[4], vec![126, 7, 11, 126]);
     }
 
     #[test]
